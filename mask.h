@@ -1,12 +1,19 @@
 #include <Wire.h>
 #include "eyes.h"
 #include "mouth.h"
+#include "microphone.h"
 
 Mouth mouth;
 Eyes eyes;
+Microphone microphone;
 
 void setup()
 {
+    // this doesn't appear to work?
+    // maybe the wave shield supplies it?
+    // // Set up Analog-to-Digital converter:
+    // analogReference(EXTERNAL); // 3.3V to AREF
+
     Serial.begin(9600);
     Serial.println("8x8 LED Matrix Test");
 
@@ -18,6 +25,9 @@ void setup()
 
     eyes.neutral();
     mouth.neutral();
+
+    pinMode(A0, INPUT);
+    microphone.startADC();
 }
 
 void loop()
@@ -68,4 +78,10 @@ void loop()
     mouth.tick();
     eyes.tick();
     delay(20);
+    if (samples >= 1000)
+    {
+        Serial.println(newSum / samples);
+        newSum = 0;
+        samples = 0;
+    }
 }
