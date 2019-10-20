@@ -67,21 +67,15 @@ void loop()
     delay(1000);
     */
 
-    if (mouth.isIdle())
-    {
-        mouth.smile();
-    }
+    // if (mouth.isIdle())
+    // {
+    //     mouth.smile();
+    // }
     if (eyes.isIdle())
     {
         eyes.blink();
     }
-    mouth.tick();
+    mouth.tick(maxSample, minSample, samples);
     eyes.tick();
     delay(20);
-    if (samples >= 1000)
-    {
-        Serial.println(newSum / samples);
-        newSum = 0;
-        samples = 0;
-    }
 }

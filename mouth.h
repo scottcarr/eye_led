@@ -6,6 +6,94 @@ namespace
 {
 
 static const uint8_t ticksPerFrame = 5;
+constexpr uint8_t numberTalkFrames = 4;
+static constexpr uint8_t numberSamplesPerFrame = 5;
+static constexpr uint16_t levelScale = 200;
+
+static const uint8_t PROGMEM leftTalkFrames[][8] =
+    {
+        {
+            B00000000,
+            B00000000,
+            B00000000,
+            B00000000,
+            B00000111,
+            B00000000,
+            B00000000,
+            B00000000,
+        },
+        {
+            B00000000,
+            B00000000,
+            B00000000,
+            B00000000,
+            B00001111,
+            B00001111,
+            B00000000,
+            B00000000,
+        },
+        {
+            B00000000,
+            B00000000,
+            B00000000,
+            B00011111,
+            B00011111,
+            B00011111,
+            B00000000,
+            B00000000,
+        },
+        {
+            B00000000,
+            B00000000,
+            B00111111,
+            B00111111,
+            B00111111,
+            B00111111,
+            B00111111,
+            B00000000,
+        }};
+static const uint8_t PROGMEM rightTalkFrames[][8] =
+    {
+        {
+            B00000000,
+            B00000000,
+            B00000000,
+            B00000000,
+            B11100000,
+            B00000000,
+            B00000000,
+            B00000000,
+        },
+        {
+            B00000000,
+            B00000000,
+            B00000000,
+            B00000000,
+            B11110000,
+            B11110000,
+            B00000000,
+            B00000000,
+        },
+        {
+            B00000000,
+            B00000000,
+            B00000000,
+            B11111000,
+            B11111000,
+            B11111000,
+            B00000000,
+            B00000000,
+        },
+        {
+            B00000000,
+            B00000000,
+            B11111100,
+            B11111100,
+            B11111100,
+            B11111100,
+            B11111100,
+            B00000000,
+        }};
 
 static const uint8_t PROGMEM leftSmile[][8] =
     {
@@ -167,6 +255,16 @@ public:
         return mSmileAnimationLeft.isIdle() && mSmileAnimationRight.isIdle();
     }
 
+    void talk(uint16_t level)
+    {
+        uint8_t frameNum = min((level / levelScale), numberTalkFrames);
+        matrix.clear();
+        Serial.println(frameNum);
+        matrix.drawBitmap(0, 0, leftTalkFrames[frameNum], 8, 16, LED_ON);
+        matrix.drawBitmap(7, 0, rightTalkFrames[frameNum], 8, 16, LED_ON);
+        matrix.writeDisplay();
+    }
+
     void tick()
     {
         if (!isIdle())
@@ -174,6 +272,18 @@ public:
             drawFrame();
             mSmileAnimationLeft.tick();
             mSmileAnimationRight.tick();
+        }
+    }
+
+    void tick(uint16_t &maxSample, uint16_t &minSample, uint16_t &samples)
+    {
+        if (samples >= numberSamplesPerFrame)
+        {
+            Serial.println(maxSample - minSample);
+            talk(maxSample - minSample);
+            maxSample = 0;
+            minSample = 0xFFFF;
+            samples = 0;
         }
     }
 

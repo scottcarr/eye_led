@@ -2,8 +2,9 @@
 #include <Arduino.h>
 
 #define ADC_CHANNEL 0 // Microphone on Analog pin 0
-unsigned long newSum = 0;
-unsigned long samples = 0;
+uint16_t minSample = 0xFFFF;
+uint16_t maxSample = 0;
+uint16_t samples = 0;
 
 ISR(ADC_vect, ISR_BLOCK)
 { // ADC conversion complete
@@ -21,8 +22,16 @@ ISR(ADC_vect, ISR_BLOCK)
     // Serial.println(buffer2in);
 
     // newSum += abs((((int)buffer2in << 8) | buffer1in) - 512);
-    newSum += ADC;
+    uint16_t sample = ADC;
     samples++;
+    if (sample < minSample)
+    {
+        minSample = sample;
+    }
+    if (sample > maxSample)
+    {
+        maxSample = sample;
+    }
     //   if(++in >= nSamples) {
     //     in     = 0;
     //     oldsum = (uint8_t)((newsum / nSamples) >> 1); // 0-255

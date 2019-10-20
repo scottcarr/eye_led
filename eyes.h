@@ -134,8 +134,13 @@ public:
     void tick()
     {
         const uint8_t *frame = nullptr;
-        if (!mBlinkAnimation.isIdle())
+        if (mBlinkAnimation.isIdle())
         {
+            cooldown_timer--;
+        }
+        else
+        {
+
             frame = mBlinkAnimation.getCurrentFrame();
             mBlinkAnimation.tick();
         }
@@ -145,17 +150,19 @@ public:
             matrix.clear();
             matrix.drawBitmap(0, 0, frame, 8, 8, LED_ON);
             matrix.writeDisplay();
+            cooldown_timer = 100;
         }
     }
 
     bool isIdle()
     {
-        return mBlinkAnimation.isIdle();
+        return cooldown_timer == 0 && mBlinkAnimation.isIdle();
     }
 
 private:
     Adafruit_8x8matrix matrix;
     Animation mBlinkAnimation;
+    unsigned int cooldown_timer = 0;
 };
 
 // void left()
